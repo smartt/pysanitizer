@@ -17,7 +17,17 @@ def compress_whitespace(s):
     >>> compress_whitespace('   Oh   hai    there   ')
     'Oh hai there'
     
+    >>> compress_whitespace('      ')
+    ''
+    
     """
+    # Cast to string
+    s = str(s).strip()
+    
+    # Sanity check
+    if (len(s) == 0):
+        return ''
+
     s = re.sub(r'\s', ' ', s)
     s = re.sub(r' +', ' ', s)
 
