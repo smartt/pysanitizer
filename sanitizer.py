@@ -9,6 +9,12 @@ __version__ = "0.3"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 # --
+def ascii_dammit(s):
+    import AsciiDammit
+    
+    return AsciiDammit.asciiDammit(s)
+
+# --
 def compress_whitespace(s):
     """
     Convert whitespace (ie., spaces, tabs, linebreaks, etc.) to spaces, and
