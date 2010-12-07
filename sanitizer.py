@@ -242,12 +242,15 @@ def strip_tags(value):
 
     >>> strip_tags(None)
 
+    >>> strip_tags('<p>oh hai.</p><p>goodbye</p>')
+    'oh hai. goodbye'
 
     """
     if value == None:
       return None
 
-    return re.sub(r'<[^>]*?>', '', '%s' % value)
+    s = re.sub(r'<[^>]*?>', ' ', '%s' % value)
+    return compress_whitespace(s)
 
 
 ## ---------------------
