@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+import unicodedata
 
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010, Erik Smartt"
@@ -10,8 +11,16 @@ __url__ = "http://github.com/smartt/pysanitizer"
 
 # --
 def ascii_dammit(s):
+    """Tries really hard to return an ASCII string."""
     import AsciiDammit
-    
+
+    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
+
+    #s = s.replace(u'\u201c', '"')
+    #s = s.replace(u'\u201d', '"')
+    #s = s.replace(u'\u2014', '-')
+    #s = s.replace(u'\u2019', "'")
+
     return AsciiDammit.asciiDammit(s)
 
 # --
@@ -19,17 +28,17 @@ def compress_whitespace(s):
     """
     Convert whitespace (ie., spaces, tabs, linebreaks, etc.) to spaces, and
     compress multiple-spaces into single-spaces.
-    
+
     >>> compress_whitespace('   Oh   hai    there   ')
     'Oh hai there'
-    
+
     >>> compress_whitespace('      ')
     ''
-    
+
     """
     # Cast to string
     s = str(s).strip()
-    
+
     # Sanity check
     if (len(s) == 0):
         return ''
