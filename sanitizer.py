@@ -14,12 +14,12 @@ def ascii_dammit(s):
     """Tries really hard to return an ASCII string."""
     import AsciiDammit
 
-    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
+    s = s.replace(u'\u201c', '"')
+    s = s.replace(u'\u201d', '"')
+    s = s.replace(u'\u2014', '--')
+    s = s.replace(u'\u2019', "'")
 
-    #s = s.replace(u'\u201c', '"')
-    #s = s.replace(u'\u201d', '"')
-    #s = s.replace(u'\u2014', '-')
-    #s = s.replace(u'\u2019', "'")
+    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
 
     return AsciiDammit.asciiDammit(s)
 
