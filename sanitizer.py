@@ -8,7 +8,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3"
+__version__ = "0.3.1"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 # --
@@ -264,6 +264,8 @@ def slugify(s):
     >>> slugify("oh_hai!'s")
     'oh-hais'
     """
+    if s is None:
+        return s
 
     value = re.sub('[^\w\s-]', '', s).strip().lower()
     value = re.sub('[-\s]+', '-', value)
@@ -294,7 +296,7 @@ def sql_safe(s):
     >>> sql_safe('hi /* there */')
     'hi  there'
     """
-    if (s == None):
+    if s is None:
         return None
 
     s = strip_tags(s).replace(';', '').replace('--', ' ').replace('/', '').replace('*', '').replace('/', '').replace("'", "\'").replace('"', '\"').strip()
