@@ -8,7 +8,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 # --
