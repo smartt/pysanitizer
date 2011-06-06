@@ -15,7 +15,10 @@ __url__ = "http://github.com/smartt/pysanitizer"
 def ascii_dammit(s):
     """Tries really hard to return an ASCII string."""
 
-    s = unicode(s, 'utf-8', 'replace')
+    try:
+        s = unicode(s, 'utf-8', 'ignore')
+    except TypeError:
+        return s
 
     # EBS: Trying to replace before normalizing can raise a UnicodeDecodeError
     #s = s.replace(u'\u201c', '"')
@@ -267,7 +270,7 @@ def slugify(s):
     if s is None:
         return s
 
-    value = re.sub('[^\w\s-]', '', s).strip().lower()
+    value = re.sub('[^\w\s-]', '', str(s)).strip().lower()
     value = re.sub('[-\s]+', '-', value)
     value = re.sub('[_\s]+', '-', value)
     return value
