@@ -130,8 +130,31 @@ def extract_numbers_safe(s):
     >>> extract_numbers_safe(None)
     ''
 
+    >>> extract_numbers_safe(7)
+    '7'
+
+    >>> extract_numbers_safe('-1')
+    '-1'
+
+    >>> extract_numbers_safe('-3.14')
+    '-314'
+
+    >>> extract_numbers_safe('-3.14.25')
+    '-31425'
+
+    >>> extract_numbers_safe('1,024')
+    '1024'
+
     """
-    return ''.join([i for i in escape(s) if (i>='0') and (i<='9')])
+    output = ''.join([i for i in escape(s) if (i>='0') and (i<='9')])
+
+    try:
+        if s[0] == '-':
+            output = '-{s}'.format(s=output)
+    except:
+        pass
+
+    return output
 
 # --
 def safe_bool(input):
