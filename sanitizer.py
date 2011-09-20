@@ -8,7 +8,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.2"
+__version__ = "0.3.4"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 # --
@@ -116,7 +116,7 @@ def escape(html):
     return ("%s" % (html)).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
 
 # --
-def extract_numbers_safe(s):
+def extract_numbers_safe(s, decimals=False):
     """
     >>> extract_numbers_safe('123')
     '123'
@@ -139,14 +139,37 @@ def extract_numbers_safe(s):
     >>> extract_numbers_safe('-3.14')
     '-314'
 
+    >>> extract_numbers_safe('-3.14', decimals=True)
+    '-3.14'
+
+    >>> extract_numbers_safe('-314', decimals=True)
+    '-314'
+
+    >>> extract_numbers_safe('314', decimals=True)
+    '314'
+
     >>> extract_numbers_safe('-3.14.25')
     '-31425'
+
+    >>> extract_numbers_safe('-3.14.25', decimals=True)
+    '-3.14'
 
     >>> extract_numbers_safe('1,024')
     '1024'
 
     """
-    output = ''.join([i for i in escape(s) if (i>='0') and (i<='9')])
+    if decimals:
+        tmp = ''.join([i for i in escape(s) if ((i>='0') and (i<='9') or i=='.')])
+
+        parts = tmp.split('.')
+
+        try:
+            output = '{a}.{b}'.format(a=parts[0], b=parts[1])
+        except IndexError:
+            output = parts[0]
+
+    else:
+        output = ''.join([i for i in escape(s) if (i>='0') and (i<='9')])
 
     try:
         if s[0] == '-':
@@ -225,6 +248,9 @@ def safe_int(arg, default=None):
     123
 
     >>> safe_int(None)
+
+
+    >>> safe_int('None')
 
 
     >>> safe_int(1)
