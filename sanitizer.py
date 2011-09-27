@@ -8,7 +8,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.4"
+__version__ = "0.3.5"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 # --
@@ -300,6 +300,24 @@ def safe_split(input, delimiter='_'):
 
     """
     return escape(input).split(delimiter)
+
+# --
+def super_flat(s):
+    """
+    >>> super_flat('')
+    ''
+    
+    >>> super_flat(None)
+    ''
+    
+    >>> super_flat('123-456-abc')
+    '123456ABC'
+    
+    """
+    if s is None:
+        return ''
+
+    return sql_safe(slugify(s).upper().replace('-', ''))
 
 # --
 def slugify(s):
