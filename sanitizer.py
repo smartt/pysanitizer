@@ -29,7 +29,12 @@ def ascii_dammit(s):
     s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
     #s = unicodedata.normalize('NFKD', s).encode('ascii', 'replace')
 
-    return AsciiDammit.asciiDammit(s)
+    try:
+        result = AsciiDammit.asciiDammit(s)
+    except UnicodeWarning:
+        result = s
+
+    return result
 
 # --
 def html_dammit(s):
@@ -306,13 +311,13 @@ def super_flat(s):
     """
     >>> super_flat('')
     ''
-    
+
     >>> super_flat(None)
     ''
-    
+
     >>> super_flat('123-456-abc')
     '123456ABC'
-    
+
     """
     if s is None:
         return ''
