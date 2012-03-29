@@ -6,12 +6,12 @@ import unicodedata
 import AsciiDammit
 
 __author__ = "Erik Smartt"
-__copyright__ = "Copyright 2010, Erik Smartt"
+__copyright__ = "Copyright 2010-2012, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.5"
+__version__ = "0.3.6"
 __url__ = "http://github.com/smartt/pysanitizer"
 
-# --
+
 def ascii_dammit(s):
     """Tries really hard to return an ASCII string."""
 
@@ -36,11 +36,11 @@ def ascii_dammit(s):
 
     return result
 
-# --
+
 def html_dammit(s):
     return AsciiDammit.htmlDammit(s)
 
-# --
+
 def compress_whitespace(s):
     """
     Convert whitespace (ie., spaces, tabs, linebreaks, etc.) to spaces, and
@@ -65,7 +65,7 @@ def compress_whitespace(s):
 
     return s.strip()
 
-# --
+
 def strip_and_compact_str(s):
     """
     Remove tags, spaces, etc.  Basically, if someone passed in multiple
@@ -106,7 +106,7 @@ def strip_and_compact_str(s):
 
     return s
 
-# --
+
 def escape(html):
     """
     Returns the given HTML with ampersands, quotes and carets encoded.
@@ -120,7 +120,7 @@ def escape(html):
     """
     return ("%s" % (html)).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
 
-# --
+
 def extract_numbers_safe(s, decimals=False):
     """
     >>> extract_numbers_safe('123')
@@ -164,7 +164,7 @@ def extract_numbers_safe(s, decimals=False):
 
     """
     if decimals:
-        tmp = ''.join([i for i in escape(s) if ((i>='0') and (i<='9') or i=='.')])
+        tmp = ''.join([i for i in escape(s) if ((i >= '0') and (i <= '9') or i == '.')])
 
         parts = tmp.split('.')
 
@@ -174,7 +174,7 @@ def extract_numbers_safe(s, decimals=False):
             output = parts[0]
 
     else:
-        output = ''.join([i for i in escape(s) if (i>='0') and (i<='9')])
+        output = ''.join([i for i in escape(s) if (i >= '0') and (i <= '9')])
 
     try:
         if s[0] == '-':
@@ -184,7 +184,7 @@ def extract_numbers_safe(s, decimals=False):
 
     return output
 
-# --
+
 def safe_bool(input):
     """
     >>> safe_bool('1')
@@ -232,7 +232,7 @@ def safe_bool(input):
         else:
             return False
 
-# --
+
 def safe_int(arg, default=None):
     """
     >>> safe_int('0')
@@ -291,7 +291,7 @@ def safe_int(arg, default=None):
         except ValueError:
             return default
 
-#  --
+
 def safe_split(input, delimiter='_'):
     """
     >>> safe_split('hi_there', '_')
@@ -306,7 +306,7 @@ def safe_split(input, delimiter='_'):
     """
     return escape(input).split(delimiter)
 
-# --
+
 def super_flat(s):
     """
     >>> super_flat('')
@@ -324,7 +324,7 @@ def super_flat(s):
 
     return sql_safe(slugify(s).upper().replace('-', ''))
 
-# --
+
 def slugify(s):
     """
     >>> slugify('oh hai')
@@ -347,7 +347,7 @@ def slugify(s):
     value = re.sub('[_\s]+', '-', value)
     return value
 
-# --
+
 def sql_safe(s):
     """
     >>> sql_safe(None)
@@ -377,7 +377,7 @@ def sql_safe(s):
     s = strip_tags(s).replace(';', '').replace('--', ' ').replace('/', '').replace('*', '').replace('/', '').replace("'", "\'").replace('"', '\"').strip()
     return s
 
-# --
+
 def strip_tags(value):
     """
     Returns the given HTML with all tags stripped.
@@ -702,7 +702,7 @@ def price_like(s):
 
     parts = s.split('.')
 
-    if not len(parts): # == 0
+    if not len(parts):  # == 0
         # This shouldn't happen. split() should always return at least a one-item list
         return ''
 
@@ -736,6 +736,44 @@ def price_like(s):
         cents = '00'
 
     return "%s.%s" % (dollars, cents)
+
+
+def price_like_float(s):
+    """
+    >>> price_like_float('')
+
+
+    >>> price_like_float('$19.95')
+    19.949999999999999
+
+    >>> price_like_float('19.95')
+    19.949999999999999
+
+    >>> price_like_float('19.95345')
+    19.949999999999999
+
+    >>> price_like_float('19.5')
+    19.5
+
+    >>> price_like_float('19.')
+    19.0
+
+    >>> price_like_float('19')
+    19.0
+
+    >>> price_like_float('19.5.34')
+
+
+    >>> price_like_float('.19')
+    0.19
+
+    """
+
+    try:
+        return float(price_like(s))
+
+    except ValueError:
+        return
 
 
 ## ---------------------
