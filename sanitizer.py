@@ -8,7 +8,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010-2012, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.7"
+__version__ = "0.3.8"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 
@@ -358,6 +358,9 @@ def slugify(s):
     'oh-hai'
 
     >>> slugify('"oh_hai!"')
+    'oh-hai'
+
+    >>> slugify('"oh_hai?"')
     'oh-hai'
 
     >>> slugify("oh_hai!'s")
@@ -831,16 +834,34 @@ def split_taxonomy_tags(s):
     >>> split_taxonomy_tags('hi, there')
     ['hi', 'there']
 
+    >>> split_taxonomy_tags('hi/there')
+    ['hi', 'there']
+
+    >>> split_taxonomy_tags('hi; there')
+    ['hi', 'there']
+
+    >>> split_taxonomy_tags('Hi, There')
+    ['hi', 'there']
+
+    >>> split_taxonomy_tags('Hi, There friend, How goes it?')
+    ['hi', 'there friend', 'how goes it']
+
     """
     if s is None:
         return None
 
     input = strip_tags(s)
 
+    # Normalize delimeters
     for delim in (';', '/', ':'):
         input = input.replace(delim, ',')
 
-    return [strip_and_compact_str(tag) for tag in input.split(',')]
+    # Stash intentional hyphens
+    input = input.replace('-', '*')
+
+    tags = [slugify(strip_and_compact_str(tag)).replace('-', ' ').replace('*', '-') for tag in input.split(',')]
+
+    return tags
 
 
 ## ---------------------
