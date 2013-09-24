@@ -8,7 +8,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010-2012, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.6"
+__version__ = "0.3.7"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 
@@ -52,6 +52,12 @@ def compress_whitespace(s):
     >>> compress_whitespace('      ')
     ''
 
+    >>> compress_whitespace("hi@there.com")
+    'hi@there.com'
+
+    >>> compress_whitespace("  hi   @ there . com")
+    'hi @ there . com'
+
     """
     # Cast to string
     s = str(s).strip()
@@ -77,7 +83,7 @@ def strip_and_compact_str(s):
     >>> strip_and_compact_str('     Hi         there. <br />    <br />  Whats    up?   ')
     'Hi there. Whats up?'
 
-    >>> strip_and_compact_str('\t  Hi \r there. <br /><br />Whats up?')
+    >>> strip_and_compact_str('''\t  Hi \r there. <br /><br />Whats up?''')
     'Hi there. Whats up?'
 
     >>> strip_and_compact_str('<p>Hi there. <br /><br />Whats up?</p>')
@@ -86,23 +92,41 @@ def strip_and_compact_str(s):
     >>> strip_and_compact_str("Hi there.  Let's have tea.")
     "Hi there. Let's have tea."
 
+    >>> strip_and_compact_str(" Hi there ")
+    'Hi there'
+
     >>> strip_and_compact_str("<i>Hi there.</i><i>Let's have tea.")
     "Hi there.Let's have tea."
 
+    >>> strip_and_compact_str("hi@there.com")
+    'hi@there.com'
+
+    >>> strip_and_compact_str("  hi   @ there . com")
+    'hi @ there . com'
+
+    >>> strip_and_compact_str(None)
+
+
     """
+    if not isinstance(s, (str,)):
+        return s
+
     # Strip tabs
     s = strip_tags(s)
 
     # Compact whitespace
     s = compress_whitespace(s)
 
-    try:
-        # Append a trailing period if there's no ending punctuation.
-        if (s[-1] not in ('.', '!', ')', '?')):
-            s = '%s.' % (s)
-    except IndexError:
-        # Odds are len(s) == 0
-        pass
+    # 2013-9-18:  This next bit really doesn't belong here.  This was business-rule logic that
+    # should be somewhere else.
+    #
+    # try:
+    #     # Append a trailing period if there's no ending punctuation.
+    #     if (s[-1] not in ('.', '!', ')', '?')):
+    #         s = '%s.' % (s)
+    # except IndexError:
+    #     # Odds are len(s) == 0
+    #     pass
 
     return s
 
@@ -366,10 +390,13 @@ def sql_safe(s):
     'hi there'
 
     >>> sql_safe("hi' WHERE=1")
-    "hi\' WHERE=1"
+    "hi' WHERE=1"
 
     >>> sql_safe('hi /* there */')
     'hi  there'
+
+    >>> sql_safe("hi@there.com")
+    'hi@there.com'
     """
     if s is None:
         return None
@@ -388,18 +415,39 @@ def strip_tags(value):
     >>> strip_tags(None)
 
     >>> strip_tags('<p>oh hai.</p><p>goodbye</p>')
-    'oh hai. goodbye'
+    'oh hai.  goodbye'
 
     >>> strip_tags('<i>oh hai.</i><i>goodbye</i>')
     'oh hai.goodbye'
+
+    >>> strip_tags("hi@there.com")
+    'hi@there.com'
+
+    >>> strip_tags("  hi   @ there . com")
+    '  hi   @ there . com'
 
     """
     if value == None:
         return None
 
+    if not isinstance(value, (str,)):
+        return value
+
     s = re.sub(r'<\/?p>', ' ', '%s' % value)
     s = re.sub(r'<[^>]*?>', '', s)
-    return compress_whitespace(s)
+
+    # return compress_whitespace(s)
+
+    try:
+        # If the original string had leading or trailing spaces, leave them be
+        if value[0] == ' ' or value[-1] == ' ':
+            return s
+        else:
+            # Otherwise, strip any that might have been created while removing tags
+            return s.strip()
+
+    except IndexError:
+        return s
 
 
 def sub_greeks(s):
@@ -744,13 +792,13 @@ def price_like_float(s):
 
 
     >>> price_like_float('$19.95')
-    19.949999999999999
+    19.95
 
     >>> price_like_float('19.95')
-    19.949999999999999
+    19.95
 
     >>> price_like_float('19.95345')
-    19.949999999999999
+    19.95
 
     >>> price_like_float('19.5')
     19.5
@@ -774,6 +822,25 @@ def price_like_float(s):
 
     except ValueError:
         return
+
+def split_taxonomy_tags(s):
+    """
+    >>> split_taxonomy_tags('hi there')
+    ['hi there']
+
+    >>> split_taxonomy_tags('hi, there')
+    ['hi', 'there']
+
+    """
+    if s is None:
+        return None
+
+    input = strip_tags(s)
+
+    for delim in (';', '/', ':'):
+        input = input.replace(delim, ',')
+
+    return [strip_and_compact_str(tag) for tag in input.split(',')]
 
 
 ## ---------------------
