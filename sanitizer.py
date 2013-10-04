@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import re
 import unicodedata
@@ -8,7 +9,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010-2012, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.8"
+__version__ = "0.3.9"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 
@@ -400,6 +401,10 @@ def sql_safe(s):
 
     >>> sql_safe("hi@there.com")
     'hi@there.com'
+
+    >>> strip_tags("Have you seen López?")
+    'Have you seen L\xc3\xb3pez?'
+
     """
     if s is None:
         return None
@@ -429,17 +434,18 @@ def strip_tags(value):
     >>> strip_tags("  hi   @ there . com")
     '  hi   @ there . com'
 
+    >>> strip_tags("Have you seen López?")
+    'Have you seen L\xc3\xb3pez?'
+
     """
     if value == None:
         return None
 
-    if not isinstance(value, (str,)):
+    if not isinstance(value, (str, unicode)):
         return value
 
-    s = re.sub(r'<\/?p>', ' ', '%s' % value)
+    s = re.sub(r'<\/?p>', ' ', value)
     s = re.sub(r'<[^>]*?>', '', s)
-
-    # return compress_whitespace(s)
 
     try:
         # If the original string had leading or trailing spaces, leave them be
@@ -863,6 +869,25 @@ def split_taxonomy_tags(s):
 
     return tags
 
+def extract_email(s):
+    """
+    >>> extract_email("hi@there.com")
+    'hi@there.com'
+
+    >>> extract_email("     hi@there.com     ")
+    'hi@there.com'
+
+    >>> extract_email("Hi There <hi@there.com>")
+    'hi@there.com'
+
+    """
+    # Pattern from https://developers.google.com/edu/python/regular-expressions
+    mo = re.search('([\w.-]+)@([\w.-]+)', s.replace('<', ' ').replace('>', ' '))
+
+    if mo:
+        return '{front}@{back}'.format(front=mo.group(1), back=mo.group(2))
+    else:
+        return None
 
 ## ---------------------
 if __name__ == "__main__":
