@@ -9,7 +9,7 @@ import AsciiDammit
 __author__ = "Erik Smartt"
 __copyright__ = "Copyright 2010-2012, Erik Smartt"
 __license__ = "MIT"
-__version__ = "0.3.9"
+__version__ = "0.3.10"
 __url__ = "http://github.com/smartt/pysanitizer"
 
 
@@ -888,6 +888,107 @@ def extract_email(s):
         return '{front}@{back}'.format(front=mo.group(1), back=mo.group(2))
     else:
         return None
+
+def add_leading_padding(s, char=' ', target_length=-1):
+    """
+    >>> add_leading_padding(s='hi')
+    'hi'
+    
+    >>> add_leading_padding(s='hi', target_length=10)
+    '        hi'
+    
+    >>> add_leading_padding(s='hi', char='-', target_length=3)
+    '-hi'
+    
+    >>> add_leading_padding(s=900)
+    '900'
+    
+    >>> add_leading_padding(s=900, char=0, target_length=5)
+    '00900'
+    
+    >>> add_leading_padding(s='hit', target_length=2)  # See what I did there?
+    'hi'
+    
+    >>> add_leading_padding(s='9021012', char='0', target_length=9)
+    '009021012'
+    
+    """
+    z = str(s)
+    
+    if target_length > 0:
+        z = z[:target_length]
+        sub_char = str(char)
+        actual_length = len(z)
+
+        if actual_length < target_length:
+            bits = []
+            for i in range(0, target_length - actual_length):
+                bits.append(sub_char)
+        
+            bits.append(z)
+    
+            z = ''.join(bits)
+    
+    return z
+    
+def format_zipcode(s):
+    """
+    >>> format_zipcode(s=90210)
+    '90210'
+    
+    >>> format_zipcode(s='90210')
+    '90210'
+
+    >>> format_zipcode(s='90210  ')
+    '90210'
+
+    >>> format_zipcode(s='   90210')
+    '90210'
+
+    >>> format_zipcode(s='   90210   ')
+    '90210'
+
+    >>> format_zipcode(s='0210')
+    '00210'
+
+    >>> format_zipcode(s=210)
+    '00210'
+
+    >>> format_zipcode(s='902101234')
+    '90210-1234'
+
+    >>> format_zipcode(s='9021012')
+    '00902-1012'
+
+    >>> format_zipcode(s='90210-1234')
+    '90210-1234'
+
+    >>> format_zipcode(s='90210-12341234')
+    '90210-1234'
+
+    >>> format_zipcode(s='9021012341234')
+    '90210-1234'
+
+    """
+    z = extract_numbers_safe(s)[:9]
+
+    length = len(z)
+    
+    # Add leading zeros if the ZIP is less than 5 chars
+    if length < 5:
+        z = add_leading_padding(s=z, char='0', target_length=5)
+    
+    elif length == 5:
+        pass
+
+    elif length < 9:
+        z = add_leading_padding(s=z, char='0', target_length=9)
+
+    # Now put the '-' back in
+    if len(z) == 9:
+        z = '{front}-{back}'.format(front=z[0:5], back=z[5:])
+        
+    return z
 
 ## ---------------------
 if __name__ == "__main__":
