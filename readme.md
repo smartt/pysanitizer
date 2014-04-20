@@ -1,1 +1,1 @@
-Docs to come.
+Deprecated. See https://github.com/smartt/sanity
